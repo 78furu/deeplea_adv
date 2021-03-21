@@ -71,7 +71,7 @@ def load_and_preprocess_data(dataset_name, batch_size, augment=False):
 
 
 
-    def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, augment=False):
+def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, augment=False):
     """Training and testing.
     
     Args:
