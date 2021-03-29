@@ -82,7 +82,7 @@ def load_and_preprocess_data(dataset_name, batch_size, augment=False):
 
 
 
-def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, augment=False):
+def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, augment=False, need_summary = False):
     """Training and testing.
     
     Args:
@@ -119,7 +119,8 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
                'test_accuracy': []}
 
     print(f"Model summary")
-    summary(model, input_size=model.input_size)
+    if need_summary:
+    	summary(model, input_size=model.input_size)
     print(f"Train the model on {dataset_name} dataset for {num_epochs} epochs...\n")
 
     device = torch.cuda.current_device()
