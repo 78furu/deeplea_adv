@@ -136,7 +136,7 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
 
             # Forward pass + backprop + loss calculation
             predictions = model(images)
-            loss = loss_function(predictions, labels)
+            loss = loss_function(predictions, images)
             optimizer.zero_grad()
             loss.backward()
 
