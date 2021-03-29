@@ -46,3 +46,9 @@ class Score(nn.Module):
             nn.ELU(),
             nn.Linear(1024, config.data.channels * 28 * 28)
         )
+
+        self.layers = [l for l in self.u_net] + [l for l in self.fc]
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x
