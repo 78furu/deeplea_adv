@@ -25,7 +25,7 @@ def load_and_preprocess_data(dataset_name, batch_size, augment=False):
     test_transforms = transforms.Compose([transforms.ToTensor()])
 
     if augment is True:
-        augmentation_transforms = [transforms.RandomCrop(32, padding=4),
+        augmentation_transforms = [transforms.RandomCrop(28, padding=4),
                                    transforms.RandomHorizontalFlip(), 
                                    transforms.RandomGrayscale(),
                                    transforms.GaussianBlur((3,3)),
