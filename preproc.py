@@ -110,7 +110,7 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
                                                          augment=augment)
 
     # Define the loss function
-    loss_function = nn.CrossEntropyLoss()
+    loss_function = nn.MSELoss()
 
     # Train the model
     history = {'train_loss': [],
