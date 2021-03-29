@@ -5,6 +5,10 @@ import torchvision
 import torchvision.transforms as transforms
 from torchsummary import summary
 
+import numpy as np
+from matplotlib import pyplot as plt
+
+
 def load_and_preprocess_data(dataset_name, batch_size, augment=False):
     """Load, preprocess and return data for training and testing.
     
