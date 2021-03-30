@@ -130,21 +130,30 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
         model = model.train()
 
         # Train
-        for i, (images, labels) in enumerate(train_loader):
-            images = images.to(device)
-            labels = labels.to(device)
+        for sigma in epses:
 
-            # Forward pass + backprop + loss calculation
-            predictions = model(images)
-            loss = loss_function(predictions, images)
-            optimizer.zero_grad()
-            loss.backward()
+            for i, (images, labels) in enumerate(train):
+                images_o = images.to(device)
+                #eps_ = (eps**2/progression[-1]**2)*2e-5
+                images = images_o + torch.normal(std=sigma,size=images_o.shape)
+                labels = (images-images_o)/sigma
+                """for i, (images, labels) in enumerate(train_loader):
+                    images = images.to(device)
+                    labels = images.to(device)
+                """    
 
-            # Update model params
-            optimizer.step()
 
-            train_loss += loss.detach().item()
-            train_acc += get_accuracy(predictions, labels, batch_size)
+                # Forward pass + backprop + loss calculation
+                predictions = model(images)
+                loss = loss_function(predictions, images)
+                optimizer.zero_grad()
+                loss.backward()
+
+                # Update model params
+                optimizer.step()
+
+                train_loss += loss.detach().item()
+                #train_acc += get_accuracy(predictions, labels, batch_size)
 
         model.eval()
         train_loss = train_loss / (i+1)
@@ -158,9 +167,9 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
             images = images.to(device)
             labels = labels.to(device)
             predictions = model(images)
-            loss = loss_function(predictions, labels)
+            #loss = loss_function(predictions, labels)
             test_loss += loss.detach().item()
-            test_acc += get_accuracy(predictions, labels, batch_size)
+            #test_acc += get_accuracy(predictions, labels, batch_size)
         test_loss = test_loss / (i+1)
         test_acc = test_acc / (i+1)
         print(f" \t  Test loss: {test_loss} | Test accuracy: {test_acc}") 
