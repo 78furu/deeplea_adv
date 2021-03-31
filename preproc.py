@@ -123,51 +123,63 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
     	summary(model, input_size=model.input_size)
     print(f"Train the model on {dataset_name} dataset for {num_epochs} epochs...\n")
 
+
+    length = 10
+    ratio = pow(0.01/10, 1/9)
+    start = 10
+    progression = np.array([start * ratio**i for i in range(length)])
+    epses = np.logspace(-5, -1, 9)
+
     device = torch.cuda.current_device()
     for epoch in range(num_epochs):
         train_loss = 0.0
         train_acc = 0.0
         model = model.train()
 
+        sigma = 0.01
         # Train
-        for sigma in epses:
-
-            for i, (images, labels) in enumerate(train):
-                images_o = images.to(device)
-                #eps_ = (eps**2/progression[-1]**2)*2e-5
-                images = images_o + torch.normal(std=sigma,size=images_o.shape)
-                labels = (images-images_o)/sigma
-                """for i, (images, labels) in enumerate(train_loader):
-                    images = images.to(device)
-                    labels = images.to(device)
-                """    
+        for i, (images, labels) in enumerate(train_loader):
+            #images_o = images.to(device)
+            #eps_ = (eps**2/progression[-1]**2)*2e-5
+            #images = images_o + torch.normal(0, std=sigma,size=images.shape).to(device)
+            #labels = (images-images_o)/sigma
+            #for i, (images, labels) in enumerate(train_loader):
+            images = images.to(device)
+            labels = images.to(device)
+            
 
 
-                # Forward pass + backprop + loss calculation
-                predictions = model(images)
-                loss = loss_function(predictions, images)
-                optimizer.zero_grad()
-                loss.backward()
+            # Forward pass + backprop + loss calculation
+            predictions = model(images)
+            loss = loss_function(predictions, labels)
+            optimizer.zero_grad()
+            loss.backward()
 
-                # Update model params
-                optimizer.step()
+            # Update model params
+            optimizer.step()
 
-                train_loss += loss.detach().item()
-                #train_acc += get_accuracy(predictions, labels, batch_size)
+            train_loss += loss.detach().item()
+            #train_acc += get_accuracy(predictions, labels, batch_size)
 
         model.eval()
         train_loss = train_loss / (i+1)
         train_acc = train_acc / (i+1)
-        print(f"Epoch: {epoch} | Train loss: {train_loss} | Train accuracy: {train_acc}")  
+        print(f"Epoch: {epoch, sigma} | Train loss: {train_loss} | Train accuracy: {train_acc}")  
 
         # Evaluate on test set
         test_loss = 0.0
         test_acc = 0.0
+        sigma = 0.01    
         for i, (images, labels) in enumerate(test_loader):
+            #images_o = images.to(device)
+            #eps_ = (eps**2/progression[-1]**2)*2e-5
+            #images = images_o + torch.normal(0, std=sigma,size=images.shape).to(device)
+            #labels = (images-images_o)/sigma
             images = images.to(device)
-            labels = labels.to(device)
+            labels = images.to(device)
+
             predictions = model(images)
-            #loss = loss_function(predictions, labels)
+            loss = loss_function(predictions, labels)
             test_loss += loss.detach().item()
             #test_acc += get_accuracy(predictions, labels, batch_size)
         test_loss = test_loss / (i+1)

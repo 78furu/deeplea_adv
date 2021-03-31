@@ -9,14 +9,14 @@ We introduce a new generative model where samples are produced via Langevin dyna
 ## Plan (might change):
 - [x] Create working envornment 
 - [x] Get network
-- [ ] Modifiy network (see article A.3):
-	- [ ] Remove/replace layers
-	- [ ] Define Stein score
+- [x] Modifiy network (see article A.3):
+	- [x] Adjustments
+    - [x] Run
 - [ ] Data preparation:
+	- [x] Define noise scales
 	- [ ] Instance norm
-	- [ ] Define noise scales
 - [ ] Train network
-- [ ] Implement Langevin simulated annealing
+- [x] Implement Langevin simulated annealing
 - [ ] Combine Langevin for diff noise
 - [ ]  (Image impainting)
 
