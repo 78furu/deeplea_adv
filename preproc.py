@@ -9,6 +9,17 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
+
+def dsm_score_estimation(scorenet, samples, sigma=0.01):
+    perturbed_samples = samples + torch.randn_like(samples) * sigma
+    target = - 1 / (sigma ** 2) * (perturbed_samples - samples)
+    scores = scorenet(perturbed_samples)
+    target = target.view(target.shape[0], -1)
+    scores = scores.view(scores.shape[0], -1)
+    loss = 1 / 2. * ((scores - target) ** 2).sum(dim=-1).mean(dim=0)
+
+    return loss
+
 def load_and_preprocess_data(dataset_name, batch_size, augment=False):
     """Load, preprocess and return data for training and testing.
     
@@ -98,19 +109,10 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
         history: dict that contains the loss and accuracy history.
     """
 
-    # Function to calculate accuracy
-    def get_accuracy(prediction, target, batch_size):
-        corrects = (torch.max(prediction, 1)[1].view(target.size()).data == target.data).sum()
-        accuracy = 100.0 * corrects / batch_size
-        return accuracy.item()
-
     # Get the train and test data
     train_loader, test_loader = load_and_preprocess_data(dataset_name, 
                                                          batch_size, 
                                                          augment=augment)
-
-    # Define the loss function
-    loss_function = nn.MSELoss()
 
     # Train the model
     history = {'train_loss': [],
@@ -150,8 +152,7 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
 
 
             # Forward pass + backprop + loss calculation
-            predictions = model(images)
-            loss = loss_function(predictions, labels)
+            loss = dsm_score_estimation(model, images)
             optimizer.zero_grad()
             loss.backward()
 
@@ -161,11 +162,11 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
             train_loss += loss.detach().item()
             #train_acc += get_accuracy(predictions, labels, batch_size)
 
-        model.eval()
         train_loss = train_loss / (i+1)
         train_acc = train_acc / (i+1)
         print(f"Epoch: {epoch, sigma} | Train loss: {train_loss} | Train accuracy: {train_acc}")  
 
+        model.eval()
         # Evaluate on test set
         test_loss = 0.0
         test_acc = 0.0
@@ -176,15 +177,14 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
             #images = images_o + torch.normal(0, std=sigma,size=images.shape).to(device)
             #labels = (images-images_o)/sigma
             images = images.to(device)
-            labels = images.to(device)
 
-            predictions = model(images)
-            loss = loss_function(predictions, labels)
+            loss = dsm_score_estimation(model, images)
             test_loss += loss.detach().item()
             #test_acc += get_accuracy(predictions, labels, batch_size)
         test_loss = test_loss / (i+1)
         test_acc = test_acc / (i+1)
-        print(f" \t  Test loss: {test_loss} | Test accuracy: {test_acc}") 
+        print(f" \t  Test loss: {test_loss} | Test accuracy: {test_acc}")
+        model.train() 
 
         # Add results to the history dict
         history['train_loss'].append(train_loss)
