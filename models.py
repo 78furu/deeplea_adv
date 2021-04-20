@@ -41,14 +41,20 @@ class Score(nn.Module):
             # state size. (nc) x 28 x 28
         )
         self.fc = nn.Sequential(
-            nn.Linear(config.data.channels * 28 * 28, 1024),
+            nn.Linear(config.data.channels * config.data.image_size * config.data.image_size, 1024),
             nn.LayerNorm(1024),
             nn.ELU(),
-            nn.Linear(1024, config.data.channels * 28 * 28)
+            nn.Linear(1024, config.data.channels * config.data.image_size * config.data.image_size)
         )
 
-        self.layers = [l for l in self.u_net] + [l for l in self.fc]
+        #self.layers = [l for l in self.u_net] + [l for l in self.fc]
+
     def forward(self, x):
-        for layer in self.layers:
-            x = layer(x)
-        return x
+        if x.is_cuda and self.config.training.ngpu > 1:
+            score = nn.parallel.data_parallel(
+                self.u_net, x, list(range(self.config.training.ngpu)))
+        else:
+            score = self.u_net(x)
+        score = self.fc(score.view(x.shape[0], -1)).view(
+            x.shape[0], self.config.data.channels, self.config.data.image_size, self.config.data.image_size)
+        return score

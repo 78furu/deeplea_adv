@@ -10,7 +10,7 @@ from matplotlib import pyplot as plt
 
 
 
-def dsm_score_estimation(scorenet, samples, sigma=0.01):
+def dsm_score_estimation(scorenet, samples, sigma=1.):
     perturbed_samples = samples + torch.randn_like(samples) * sigma
     target = - 1 / (sigma ** 2) * (perturbed_samples - samples)
     scores = scorenet(perturbed_samples)
@@ -130,7 +130,8 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
     ratio = pow(0.01/10, 1/9)
     start = 10
     progression = np.array([start * ratio**i for i in range(length)])
-    epses = np.logspace(-5, -1, 9)
+    epses = np.logspace(-1, -5, 9)
+    sigma = 0.1
 
     device = torch.cuda.current_device()
     for epoch in range(num_epochs):
@@ -138,7 +139,6 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
         train_acc = 0.0
         model = model.train()
 
-        sigma = 0.01
         # Train
         for i, (images, labels) in enumerate(train_loader):
             #images_o = images.to(device)
@@ -152,7 +152,7 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
 
 
             # Forward pass + backprop + loss calculation
-            loss = dsm_score_estimation(model, images)
+            loss = dsm_score_estimation(model, images, sigma = sigma)
             optimizer.zero_grad()
             loss.backward()
 
@@ -170,7 +170,6 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
         # Evaluate on test set
         test_loss = 0.0
         test_acc = 0.0
-        sigma = 0.01    
         for i, (images, labels) in enumerate(test_loader):
             #images_o = images.to(device)
             #eps_ = (eps**2/progression[-1]**2)*2e-5
