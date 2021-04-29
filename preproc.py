@@ -93,7 +93,8 @@ def load_and_preprocess_data(dataset_name, batch_size, augment=False):
 
 
 
-def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, augment=False, need_summary = False):
+def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, 
+                        augment=False, need_summary = False, sigma = None):
     """Training and testing.
     
     Args:
@@ -131,7 +132,7 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs, au
     start = 10
     progression = np.array([start * ratio**i for i in range(length)])
     epses = np.logspace(-1, -5, 9)
-    sigma = 0.1
+    sigma = 0.1 if sigma is None else sigma
 
     device = torch.cuda.current_device()
     for epoch in range(num_epochs):
