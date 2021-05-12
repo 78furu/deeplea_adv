@@ -4,6 +4,8 @@ import torch.nn.functional as F
 import torchvision
 import torchvision.transforms as transforms
 from torchsummary import summary
+import yaml
+from collections import namedtuple
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -221,3 +223,31 @@ def plot_history(history):
     plt.legend()
     
     plt.show()
+
+def annealed_langevin(model, sigmas, eps = 2e-5, T = 10,return_all = False):
+    x_0 = torch.rand(1,1, 28, 28).to("cuda")
+    alls = [x_0[0][0].cpu().detach().numpy().copy()]
+    for sigma in sigmas:
+        alpha = eps*sigma**2/sigmas[-1]**2
+        for t in range(T):
+            z = torch.normal(0, 1, size = x_0.shape).to("cuda")
+            x_0 += alpha/2 * model(x_0) +  np.sqrt(alpha)*z
+        alls.append(x_0[0][0].cpu().detach().numpy().copy())
+    return alls if return_all else x_0
+
+def generate_config_namedtuple(file = open(r'scorenet.yml'), image_size=28,
+                               channels = 1):
+
+    config = yaml.load(file)
+    config2 = {}
+    for k,d in config.items():
+        MyTuple = namedtuple("MyTuple", d)
+        if d.get("image_size"):
+            d["image_size"] = image_size
+            d["channels"] = channels
+        my_tuple = MyTuple(**d)
+        config2[k] = my_tuple
+
+    MyTuple = namedtuple("MyTuple", config2)
+    my_tuple = MyTuple(**config2)
+    return my_tuple
