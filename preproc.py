@@ -193,3 +193,31 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs,
         history['test_accuracy'].append(test_acc)
    
     return model, history
+
+
+def plot_history(history):
+    """Plot loss and accuracy history.
+    
+    Args:
+        history: dict of train and test loss values and accuracy values, calculated in each epoch.
+    """
+
+    fig = plt.figure(figsize=(15, 5))
+
+    # Plot the loss history
+    f1 = fig.add_subplot(121)
+    plt.title('Loss')
+    plt.plot(history['train_loss'], color='blue', label='train')
+    plt.plot(history['test_loss'], color='orange', label='test')
+    plt.xlabel('Epochs')
+    plt.legend()
+
+    # Plot the accuracy history
+    f2 = fig.add_subplot(122)
+    plt.title('Classification Accuracy')
+    plt.plot(history['train_accuracy'], color='blue', label='train')
+    plt.plot(history['test_accuracy'], color='orange', label='test')
+    plt.xlabel('Epochs')
+    plt.legend()
+    
+    plt.show()
