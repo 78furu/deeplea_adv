@@ -179,8 +179,7 @@ def training_and_eval(dataset_name, model, optimizer, batch_size, num_epochs,
             #images = images_o + torch.normal(0, std=sigma,size=images.shape).to(device)
             #labels = (images-images_o)/sigma
             images = images.to(device)
-
-            loss = dsm_score_estimation(model, images)
+            loss = dsm_score_estimation(model, images, sigma = sigma)
             test_loss += loss.detach().item()
             #test_acc += get_accuracy(predictions, labels, batch_size)
         test_loss = test_loss / (i+1)
